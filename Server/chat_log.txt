@@ -1,0 +1,21 @@
+AA: Hi from A
+BB: Hi from B
+CC: Hi from C
+AA: Good Day everyone
+BB: Good
+CC: Not bad
+AA: bye
+AA has left the chat!
+BB: bye
+BB has left the chat!
+CC: bye
+CC has left the chat!
+b: hi
+b: hello
+bruno: hello
+b: hello
+b: hi
+b: hi
+b: hello
+bruno: hi
+bruno: hello
