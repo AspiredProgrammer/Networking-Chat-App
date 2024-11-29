@@ -19,3 +19,9 @@ b: hi
 b: hello
 bruno: hi
 bruno: hello
+user2: Hi
+user1: Hello
+user1: bye
+user1 has left the chat!
+user2: bye
+user2 has left the chat!
