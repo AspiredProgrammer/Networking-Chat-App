@@ -1,0 +1,29 @@
+a: bye
+a has left the chat!
+A: bye
+A has left the chat!
+
+A has left the chat!
+a: bye
+a has left the chat!
+
+A has left the chat!
+
+a has left the chat!
+
+A has left the chat!
+
+A has left the chat!
+A: bye
+A has left the chat!
+B: bye
+B has left the chat!
+Amy: hello
+Amy: bye
+Amy has left the chat!
+Amy: bye
+Amy has left the chat!
+Anonymous: bye
+Anonymous has left the chat!
+A: bye
+A has left the chat!
