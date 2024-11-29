@@ -27,3 +27,9 @@ Anonymous: bye
 Anonymous has left the chat!
 A: bye
 A has left the chat!
+
+A has left the chat!
+Test: bye
+Test has left the chat!
+Test2: bye
+Test2 has left the chat!

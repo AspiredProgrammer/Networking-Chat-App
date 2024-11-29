@@ -17,7 +17,7 @@ class Server:
         # Inform server admin that logs are being appended
         print(f"Chat logs will be appended to: {self.log_file}")
 
-    
+
     def handle_client_connection(self):
         while True:
             client_socket, address = self.socket.accept()
