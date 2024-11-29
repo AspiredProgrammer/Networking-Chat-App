@@ -11,9 +11,11 @@ class Client:
         self.socket.connect((HOST, PORT))
 
         # Setup tkinter GUI
+        # Chat client main window application
         self.root = tk.Tk()
         self.root.title("Chat Client")
 
+        #Chat window, white text area
         self.chat_window = scrolledtext.ScrolledText(
             self.root, state='disabled', wrap=tk.WORD, width=50, height=20)
         self.chat_window.pack(padx=10, pady=10)
@@ -23,10 +25,12 @@ class Client:
         self.user_listbox = tk.Listbox(self.root, height=10, width=30)
         self.user_listbox.pack(padx=10, pady=5, side=tk.RIGHT)
 
+        #Input text
         self.message_input = tk.Entry(self.root, width=40)
         self.message_input.pack(padx=10, pady=5, side=tk.LEFT)
-        self.message_input.bind("<Return>", self.send_message)
+        self.message_input.bind("<Return>", self.send_message)# OnClick on the Enter key, it triggers the send_message
 
+        #Send button
         self.send_button = tk.Button(
             self.root, text="Send", command=self.send_message_event)
         self.send_button.pack(pady=5, padx=5, side=tk.LEFT)
@@ -41,6 +45,7 @@ class Client:
             self.root, text="Exit", command=self.on_close)
         self.exit_button.pack(pady=5, padx=5, side=tk.RIGHT)
 
+        # update the GUI with the component
         self.root.update()
 
         # Ask user for name
@@ -55,9 +60,10 @@ class Client:
     def handle_server_connection(self):
         self.socket.send(self.name.encode())
         threading.Thread(target=self.receive_message, daemon=True).start()
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)# when close the main window application, end the connection with server
         self.root.mainloop()
 
+    #Define that the button is clickable and "None" there is no default message
     def send_message_event(self):
         self.send_message(None)
 
@@ -65,9 +71,11 @@ class Client:
         client_input = self.message_input.get()
         if client_input.strip():
             client_message = self.name + ": " + client_input
+            # Add client message to the chat box before send it to the server socket
+            # Put the client message to the right and green color
             self.display_message(client_message, "green", "right")
             self.socket.send(client_message.encode())
-            self.message_input.delete(0, tk.END)
+            self.message_input.delete(0, tk.END)#Clean input text after sending message
 
     def receive_message(self):
         while True:
@@ -140,12 +148,14 @@ class Client:
     def display_message(self, message, color=None, align="left"):
         self.chat_window.config(state='normal')
 
+        # Determine the tags (tag_config in the init) to apply
         tags = []
         if color:
             tags.append(color)
         if align:
             tags.append(align)
 
+         # Insert the message with the specified tags
         self.chat_window.insert(tk.END, message + '\n', tuple(tags))
         self.chat_window.config(state='disabled')
         self.chat_window.see(tk.END)
@@ -162,3 +172,8 @@ class Client:
 
 if __name__ == '__main__':
     Client('127.0.0.1', 12000)
+
+
+
+
+    ##127.0.0.1 /192.168.1.208
