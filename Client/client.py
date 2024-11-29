@@ -33,6 +33,12 @@ class Client:
         self.download_button = tk.Button(
             self.root, text="Download File", command=self.download_file)
         self.download_button.pack(pady=5, padx=5, side=tk.RIGHT)
+
+        # Add Exit Button
+        self.exit_button = tk.Button(
+            self.root, text="Exit", command=self.on_close)
+        self.exit_button.pack(pady=5, padx=5, side=tk.RIGHT)
+
         self.root.update()
 
         # Ask user for name
@@ -61,8 +67,6 @@ class Client:
             # Put the client message to the right and green color
             self.display_message(client_message, "green", "right")
             self.socket.send(client_message.encode())
-            if client_input.lower() == 'bye':
-                self.on_close()
             self.message_input.delete(0, tk.END)
 
     def receive_message(self):
@@ -149,6 +153,7 @@ class Client:
 
     def on_close(self):
         try:
+            self.socket.send(f"{self.name}: bye".encode())
             self.socket.close()
         except Exception:
             pass
