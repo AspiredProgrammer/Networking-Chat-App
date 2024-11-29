@@ -2,8 +2,6 @@ import socket
 import threading
 
 # Class Server has a list of clients
-
-
 class Server:
     Clients = []
 
@@ -19,6 +17,7 @@ class Server:
         # Inform server admin that logs are being appended
         print(f"Chat logs will be appended to: {self.log_file}")
 
+    
     def handle_client_connection(self):
         while True:
             client_socket, address = self.socket.accept()
@@ -34,6 +33,10 @@ class Server:
                 client_name, client_name + ' has joined the chat!')
 
             Server.Clients.append(client)
+
+            # Broadcast updated user list
+            self.broadcast_user_list()
+
             threading.Thread(target=self.handle_new_message,
                              args=(client,)).start()
 
@@ -44,7 +47,7 @@ class Server:
             try:
                 client_message = client_socket.recv(1024).decode()
 
-                # Checks if the message is a file related request
+                # Checks if the message is a file-related request
                 if client_message.startswith('FILE:'):
                     file_name = client_message.split(':')[1]
                     self.receive_file(client_socket, file_name)
@@ -68,6 +71,10 @@ class Server:
                     self.save_message_to_file(
                         client_name + ' has left the chat!')
                     Server.Clients.remove(client)
+
+                    # Broadcast updated user list
+                    self.broadcast_user_list()
+
                     client_socket.close()
                     break
                 else:
@@ -76,6 +83,10 @@ class Server:
             except ConnectionResetError:
                 print(f"Connection with {client_name} lost.")
                 Server.Clients.remove(client)
+
+                # Broadcast updated user list
+                self.broadcast_user_list()
+
                 client_socket.close()
                 break
 
@@ -85,6 +96,13 @@ class Server:
             client_name = client['client_name']
             if client_name != sender_name:
                 client_socket.send(message.encode())
+
+    def broadcast_user_list(self):
+        # Generate the list of connected user names
+        user_list = [client['client_name'] for client in Server.Clients]
+        user_list_message = "USERS:" + ",".join(user_list)
+        for client in Server.Clients:
+            client['client_socket'].send(user_list_message.encode())
 
     def receive_file(self, client_socket, file_name):
         try:

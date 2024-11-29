@@ -20,21 +20,23 @@ class Client:
         self.chat_window.tag_config("green", foreground="green")
         self.chat_window.tag_config("right", justify="right")
 
+        self.user_listbox = tk.Listbox(self.root, height=10, width=30)
+        self.user_listbox.pack(padx=10, pady=5, side=tk.RIGHT)
+
         self.message_input = tk.Entry(self.root, width=40)
         self.message_input.pack(padx=10, pady=5, side=tk.LEFT)
         self.message_input.bind("<Return>", self.send_message)
 
         self.send_button = tk.Button(
             self.root, text="Send", command=self.send_message_event)
-        self.send_button.pack(pady=5, padx=5, side=tk.RIGHT)
+        self.send_button.pack(pady=5, padx=5, side=tk.LEFT)
         self.file_button = tk.Button(
             self.root, text="Send File", command=self.send_file)
-        self.file_button.pack(pady=5, padx=5, side=tk.RIGHT)
+        self.file_button.pack(pady=5, padx=5, side=tk.LEFT)
         self.download_button = tk.Button(
             self.root, text="Download File", command=self.download_file)
-        self.download_button.pack(pady=5, padx=5, side=tk.RIGHT)
+        self.download_button.pack(pady=5, padx=5, side=tk.LEFT)
 
-        # Add Exit Button
         self.exit_button = tk.Button(
             self.root, text="Exit", command=self.on_close)
         self.exit_button.pack(pady=5, padx=5, side=tk.RIGHT)
@@ -63,8 +65,6 @@ class Client:
         client_input = self.message_input.get()
         if client_input.strip():
             client_message = self.name + ": " + client_input
-            # Add client message to the chat box before send it to the server socket
-            # Put the client message to the right and green color
             self.display_message(client_message, "green", "right")
             self.socket.send(client_message.encode())
             self.message_input.delete(0, tk.END)
@@ -72,39 +72,43 @@ class Client:
     def receive_message(self):
         while True:
             try:
-                server_message = self.socket.recv(1024)
+                server_message = self.socket.recv(1024).decode()
 
-                # Detect server error message
-                if server_message.startswith(b"ERROR:"):
-                    self.display_message(server_message.decode(), "red")
+                # Detect user list message
+                if server_message.startswith("USERS:"):
+                    user_list = server_message[6:].split(",")
+                    self.update_user_list(user_list)
                     continue
 
-                # Detect file data and ignore on UI
-                if server_message.endswith(b'EOF'):
+                # Detect server error message
+                if server_message.startswith("ERROR:"):
+                    self.display_message(server_message, "red")
                     continue
 
                 # Process regular messages
-                self.display_message(server_message.decode())
+                self.display_message(server_message)
             except ConnectionResetError:
                 break
         self.on_close()
 
+    def update_user_list(self, user_list):
+        # Clear the current list
+        self.user_listbox.delete(0, tk.END)
+        # Populate with updated user list
+        for user in user_list:
+            self.user_listbox.insert(tk.END, user)
+
     def send_file(self):
-        # Dialog box to select file
         file_path = filedialog.askopenfilename()
         if file_path:
             try:
-                # File name and content
                 file_name = os.path.basename(file_path)
                 with open(file_path, 'rb') as file:
                     file_data = file.read()
 
-                # Send a message indicating the file sending
                 self.socket.send(f'FILE:{file_name}'.encode())
-
-                # Send the file in chunks
                 self.socket.sendall(file_data)
-                self.socket.send(b'EOF')  # Marks as end of file
+                self.socket.send(b'EOF')
 
                 self.display_message(
                     f"File '{file_name}' sent successfully!", "green", "right")
@@ -117,14 +121,12 @@ class Client:
             "Download File", "Enter the name of the file to download:", parent=self.root)
         if file_name:
             try:
-                # Request download
                 self.socket.send(f"DOWNLOAD:{file_name}".encode())
 
                 with open(file_name, 'wb') as file:
                     while True:
                         file_data = self.socket.recv(1024)
                         if file_data.endswith(b'EOF'):
-                            # Remove 'EOF' and save the remaining data
                             file.write(file_data[:-3])
                             break
                         file.write(file_data)
@@ -138,16 +140,13 @@ class Client:
     def display_message(self, message, color=None, align="left"):
         self.chat_window.config(state='normal')
 
-        # Determine the tags (tag_config in the init) to apply
         tags = []
         if color:
             tags.append(color)
         if align:
             tags.append(align)
 
-        # Insert the message with the specified tags
         self.chat_window.insert(tk.END, message + '\n', tuple(tags))
-
         self.chat_window.config(state='disabled')
         self.chat_window.see(tk.END)
 
